@@ -605,17 +605,27 @@
             buttons.forEach(btn => btn.style.display = 'none');
             
             // Set options for html2canvas
+             
             const opt = {
-                scale: 2,
-                logging: false,
-                useCORS: true,
-                allowTaint: true,
-                letterRendering: true,
-                width: element.offsetWidth,
-                windowWidth: element.scrollWidth,
-                height: element.scrollHeight
-            };
-            
+    scale: 2,
+    logging: false,
+    useCORS: true,
+    allowTaint: true,
+    letterRendering: true,
+    width: element.offsetWidth,
+    windowWidth: element.scrollWidth,
+    height: element.scrollHeight,
+    ignoreElements: function(element) {
+        // Ignore browser UI elements
+        return element.id === 'tab-bar' || element.className.includes('browser-chrome');
+    },
+    onclone: function(clonedDoc) {
+        // Remove any browser UI elements from the cloned document
+        const unwantedElements = clonedDoc.querySelectorAll('title, meta, link, script, style');
+        unwantedElements.forEach(el => el.remove());
+    }
+};
+
             // Create a promise to ensure all fonts are loaded
             const fontLoadPromise = document.fonts ? document.fonts.ready : Promise.resolve();
             
@@ -661,5 +671,20 @@
             });
         });
     </script>
+    <style>
+@media print {
+    @page {
+        margin: 0;
+        size: auto;
+    }
+    body {
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+    /* Hide browser UI elements */
+    header, footer, title, address {
+        display: none !important;
+    }
+}</style>
 </body>
 </html>
